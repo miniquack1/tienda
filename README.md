@@ -2,6 +2,8 @@
 
 Tienda web estática para mostrar, buscar y gestionar un catálogo de herramientas y equipos industriales.
 
+Proyecto creado para programación web como parte de mi ruta de aprendizaje
+
 La aplicación incluye una página principal, catálogo de productos, carrito de compras, página de contacto y un panel administrativo protegido por contraseña.
 
 ## Características
@@ -43,4 +45,4 @@ Se puede ejecutar el proyecto directamente abriendo `index.html` en el navegador
 Para una ejecución local más fiable, utiliza un servidor HTTP:
 
 ```bash
-python3 -m http.server 8000
+Solo nesesitas acceder al deployment de la github pages
