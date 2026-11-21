@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel CRUD | Arauco Importaciones</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00b4ff;
+            --cyan-dark: #0095d6;
+            --dark: #1f2937;
+            --bg: #f8fafc;
+            --border: #e5e7eb;
+            --white: #ffffff;
+            --neon-cyan: #00f0ff;
+            --neon-purple: #b84dff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--dark);
+        }
+
+        /* Pantalla de Contraseña */
+        #loginGate {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .gate-card {
+            background: var(--white);
+            padding: 32px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .gate-card h2 {
+            margin-bottom: 8px;
+        }
+
+        .gate-card p {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 18px;
+        }
+
+        .gate-card input {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .gate-card button {
+            width: 100%;
+            padding: 11px;
+            background: var(--cyan);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        #crudApp {
+            display: none;
+        }
+
+        header {
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            padding: 13px 4%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .phone-strip {
+            background: var(--cyan);
+            color: var(--dark);
+            padding: 7px 4%;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .main-wrap {
+            max-width: 1360px;
+            margin: 22px auto 50px;
+            padding: 0 4%;
+        }
+
+        /* Banner verde de notificación */
+        .toast-banner {
+            display: none;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            border-radius: 6px;
+            padding: 12px 18px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.92rem;
+            margin-bottom: 20px;
+        }
+
+        .toast-banner.show {
+            display: block;
+        }
+
+        .grid-crud {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 22px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d1fae5;
+            color: #111827;
+        }
+
+        .field {
+            margin-bottom: 13px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 9px 11px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: var(--cyan);
+        }
+
+        .row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: #27272a;
+            color: var(--white);
+            border: none;
+            padding: 11px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #111827;
+        }
+
+        .btn-cancel {
+            display: none;
+            width: 100%;
+            background: #e5e7eb;
+            color: #1f2937;
+            border: none;
+            padding: 9px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .table-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #d1fae5;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .table-top h2 {
+            border: none;
+            padding: 0;
+            margin: 0;
+            font-size: 1.35rem;
+        }
+
+        .search-table {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            width: 230px;
+            outline: none;
+        }
+
+        .search-table:focus {
+            border-color: var(--cyan);
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 11px 10px;
+            border-bottom: 2px solid #e5e7eb;
+            font-weight: 700;
+            color: #111827;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 11px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        tbody tr:hover {
+            background: #f1f5f9;
+        }
+
+        .avatar-circle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            display: block;
+        }
+
+        .action-group {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            white-space: nowrap;
+        }
+
+        .icon-action-btn {
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+
+        .icon-action-btn:hover {
+            transform: translateY(-1px);
+            opacity: 0.92;
+        }
+
+        .btn-view {
+            background: #10b981;
+        }
+
+        .btn-edit-ico {
+            background: #0d6efd;
+        }
+
+        .btn-del-ico {
+            background: #dc3545;
+        }
+
+        /* Modal de detalle rápido */
+        .detail-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .detail-modal.open {
+            display: flex;
+        }
+
+        .detail-box {
+            background: #ffffff;
+            border-radius: 10px;
+            max-width: 420px;
+            width: 100%;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .detail-box img {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--cyan);
+            margin: 0 auto 14px;
+            display: block;
+        }
+
+        /* MODAL ELIMINAR EN NEÓN AZULADO CON LILA */
+        .neon-delete-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(9, 12, 28, 0.72);
+            backdrop-filter: blur(5px);
+            z-index: 700;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .neon-delete-overlay.open {
+            display: flex;
+            animation: fadeInNeon 0.18s ease-out;
+        }
+
+        @keyframes fadeInNeon {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .neon-delete-card {
+            position: relative;
+            width: 100%;
+            max-width: 410px;
+            background: linear-gradient(155deg, #131836 0%, #1b1233 100%);
+            color: #f3e8ff;
+            border-radius: 16px;
+            padding: 28px 26px 24px;
+            border: 1.5px solid rgba(184, 77, 255, 0.65);
+            box-shadow:
+                0 0 18px rgba(0, 240, 255, 0.28),
+                0 0 36px rgba(184, 77, 255, 0.32),
+                0 18px 40px rgba(0, 0, 0, 0.55);
+            text-align: center;
+        }
+
+        .neon-badge-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(184, 77, 255, 0.14);
+            border: 1.5px solid var(--neon-cyan);
+            box-shadow: 0 0 16px rgba(0, 240, 255, 0.45), inset 0 0 12px rgba(184, 77, 255, 0.35);
+            color: var(--neon-cyan);
+        }
+
+        .neon-delete-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.3px;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, var(--neon-cyan), #d8b4fe, var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .neon-delete-text {
+            font-size: 0.92rem;
+            color: #e2d9f3;
+            margin-bottom: 12px;
+            line-height: 1.45;
+        }
+
+        .neon-product-chip {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.45);
+            color: var(--neon-cyan);
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.83rem;
+            font-weight: 700;
+            margin-bottom: 22px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .neon-delete-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-neon-cancel {
+            background: rgba(255, 255, 255, 0.06);
+            color: #e9d5ff;
+            border: 1.5px solid rgba(0, 240, 255, 0.55);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-neon-cancel:hover {
+            background: rgba(0, 240, 255, 0.16);
+            box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
+        }
+
+        .btn-neon-confirm {
+            background: linear-gradient(135deg, #00b4ff 0%, #9333ea 100%);
+            color: #ffffff;
+            border: 1.5px solid #e879f9;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 0 16px rgba(184, 77, 255, 0.5);
+            transition: 0.2s;
+        }
+
+        .btn-neon-confirm:hover {
+            filter: brightness(1.12);
+            box-shadow: 0 0 22px rgba(0, 240, 255, 0.55), 0 0 26px rgba(184, 77, 255, 0.65);
+        }
+
+        @media (max-width: 960px) {
+            .grid-crud {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- PANTALLA DE CONTRASEÑA -->
+    <div id="loginGate">
+        <div class="gate-card">
+            <h2>🔒 Acceso CRUD</h2>
+            <p>Solo administrador. Ingresa la clave para gestionar el catálogo.</p>
+            <form onsubmit="validarClave(event)">
+                <input type="password" id="claveInput" placeholder="Contraseña..." required autofocus />
+                <button type="submit">Entrar</button>
+            </form>
+            <p id="claveError" style="color:#dc2626; display:none; margin-top:10px;">Contraseña incorrecta.</p>
+            <a href="index.html"
+                style="display:inline-block; margin-top:14px; font-size:0.82rem; color:#0095d6; text-decoration:none;">←
+                Volver a la tienda</a>
+        </div>
+    </div>
+
+    <!-- PANEL CRUD -->
+    <div id="crudApp">
+        <header>
+            <strong style="font-size:1.3rem; color:var(--cyan);">CRUD CATÁLOGO • ARAUCO</strong>
+            <div style="display:flex; gap:10px;">
+                <a href="index.html"
+                    style="padding:7px 14px; border:1px solid #cbd5e1; border-radius:5px; text-decoration:none; color:var(--dark); font-size:0.85rem; font-weight:600;">Ver
+                    Tienda</a>
+                <button onclick="salir()"
+                    style="padding:7px 14px; background:#fee2e2; color:#b91c1c; border:none; border-radius:5px; font-weight:600; cursor:pointer; font-size:0.85rem;">Salir</button>
+            </div>
+        </header>
+        <div class="phone-strip">Soporte y ventas: +591 72775209</div>
+
+        <div class="main-wrap">
+            <div class="toast-banner" id="toastBanner">Operación realizada con éxito.</div>
+
+            <div class="grid-crud">
+                <!-- FORMULARIO -->
+                <div class="card">
+                    <h2 id="formHeading">Registrar Producto</h2>
+                    <form id="crudForm" onsubmit="guardarItem(event)">
+                        <input type="hidden" id="itemId" />
+
+                        <div class="row-2">
+                            <div class="field">
+                                <label>N° Catálogo</label>
+                                <input type="number" id="numero" placeholder="Ej. 61" required />
+                            </div>
+                            <div class="field">
+                                <label>Código</label>
+                                <input type="text" id="codigo" placeholder="Ej. AG010" required />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Nombre</label>
+                            <input type="text" id="nombre" placeholder="Nombre del producto" required />
+                        </div>
+
+                        <div class="row-2">
+                            <div class="field">
+                                <label>Precio (Bs.)</label>
+                                <input type="number" step="0.01" id="precio" placeholder="0.00" required />
+                            </div>
+                            <div class="field">
+                                <label>Marca</label>
+                                <input type="text" id="marca" placeholder="Makute, RIDEC..." required />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label>Categoría</label>
+                            <select id="categoria">
+                                <option value="Línea Eléctrica">Línea Eléctrica</option>
+                                <option value="Herramientas Inalámbricas">Herramientas Inalámbricas</option>
+                                <option value="Línea Mecánica Profesional">Línea Mecánica Profesional</option>
+                                <option value="Línea Soldadura Profesional e Industrial">Línea Soldadura Profesional e
+                                    Industrial</option>
+                                <option value="Equipos al Aire Libre">Equipos al Aire Libre</option>
+                                <option value="Herramientas de Medición y Obra Fina">Herramientas de Medición y Obra
+                                    Fina</option>
+                                <option value="Línea de Seguridad y Protección">Línea de Seguridad y Protección</option>
+                                <option value="Brocas y Accesorios">Brocas y Accesorios</option>
+                                <option value="Herramienta Manual y Accesorios">Herramienta Manual y Accesorios</option>
+                                <option value="Discos">Discos</option>
+                                <option value="Ruedas">Ruedas</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label>URL Imagen / Avatar (opcional)</label>
+                            <input type="url" id="imagen" placeholder="https://..." />
+                        </div>
+
+                        <div class="field">
+                            <label>Descripción</label>
+                            <textarea id="descripcion" rows="3" placeholder="Detalles técnicos..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-submit" id="btnGuardar">Registrar Producto</button>
+                        <button type="button" class="btn-cancel" id="btnCancelar" onclick="resetForm()">Cancelar
+                            edición</button>
+                    </form>
+                </div>
+
+                <!-- TABLA -->
+                <div class="card">
+                    <div class="table-top">
+                        <h2>Lista de Productos (<span id="countRows">0</span>)</h2>
+                        <input type="text" class="search-table" id="filterCrud"
+                            placeholder="Buscar producto o código..." oninput="filtrarCrud()" />
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Código</th>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th>Precio</th>
+                                    <th>Avatar</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="crudBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VER DETALLE -->
+    <div class="detail-modal" id="detailModal" onclick="if(event.target===this) cerrarDetalle()">
+        <div class="detail-box" id="detailBoxContent"></div>
+    </div>
+
+    <!-- MODAL CONFIRMAR ELIMINAR (NEÓN AZULADO + LILA) -->
+    <div class="neon-delete-overlay" id="neonDeleteModal" onclick="if(event.target===this) cerrarModalEliminar()">
+        <div class="neon-delete-card">
+            <div class="neon-badge-icon">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                </svg>
+            </div>
+            <h3 class="neon-delete-title">Confirmar Eliminación</h3>
+            <p class="neon-delete-text">¿Seguro que deseas eliminar este producto del catálogo?</p>
+            <div class="neon-product-chip" id="neonDeleteTarget">Producto</div>
+            <div class="neon-delete-actions">
+                <button type="button" class="btn-neon-cancel" onclick="cerrarModalEliminar()">Cancelar</button>
+                <button type="button" class="btn-neon-confirm" id="btnConfirmNeonDelete"
+                    onclick="confirmarEliminacion()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CLAVE_ADMIN = "kila2026";
+        const API_URL = "https://6afee2f03a0e70bc8d541cb3.mockapi.io/api/v1/productos";
+        const AVATAR_DEFAULT = "https://placehold.co/100x100/e0f2fe/0284c7?text=PROD";
+
+        let items = [];
+        let idPendienteEliminar = null;
+
+        if (sessionStorage.getItem("kila_crud_ok") === "1") abrirCrud();
+
+        function validarClave(e) {
+            e.preventDefault();
+            if (document.getElementById("claveInput").value === CLAVE_ADMIN) {
+                sessionStorage.setItem("kila_crud_ok", "1");
+                abrirCrud();
+            } else {
+                document.getElementById("claveError").style.display = "block";
+            }
+        }
+
+        function abrirCrud() {
+            document.getElementById("loginGate").style.display = "none";
+            document.getElementById("crudApp").style.display = "block";
+            cargarItems();
+        }
+
+        function salir() {
+            sessionStorage.removeItem("kila_crud_ok");
+            location.reload();
+        }
+
+        function mostrarAviso(mensaje) {
+            const banner = document.getElementById("toastBanner");
+            banner.textContent = mensaje;
+            banner.classList.add("show");
+            setTimeout(() => banner.classList.remove("show"), 3200);
+        }
+
+        async function cargarItems() {
+            const res = await fetch(API_URL);
+            items = await res.json();
+            pintarTabla(items);
+        }
+
+        function pintarTabla(data) {
+            document.getElementById("countRows").textContent = data.length;
+            const tbody = document.getElementById("crudBody");
+
+            if (!data.length) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#6b7280;">No hay productos registrados.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map((p, index) => {
+                const imgSrc = p.imagen && p.imagen.trim() !== "" ? p.imagen : AVATAR_DEFAULT;
+                return `
+          <tr>
+            <td>${p.numero || index + 1}</td>
+            <td><strong>${p.codigo || "-"}</strong></td>
+            <td>${p.nombre}</td>
+            <td>${p.categoria || "-"}</td>
+            <td><strong>Bs. ${Number(p.precio || 0).toFixed(2)}</strong></td>
+            <td>
+              <img class="avatar-circle" src="${imgSrc}" alt="${p.nombre}" onerror="this.src='${AVATAR_DEFAULT}'" />
+            </td>
+            <td>
+              <div class="action-group">
+                <button class="icon-action-btn btn-view" title="Ver detalle" onclick="verDetalle('${p.id}')">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="icon-action-btn btn-edit-ico" title="Editar" onclick="editarItem('${p.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="icon-action-btn btn-del-ico" title="Borrar" onclick="borrarItem('${p.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+            }).join("");
+        }
+
+        function filtrarCrud() {
+            const q = document.getElementById("filterCrud").value.toLowerCase().trim();
+            pintarTabla(items.filter(p =>
+                (p.nombre && p.nombre.toLowerCase().includes(q)) ||
+                (p.codigo && p.codigo.toLowerCase().includes(q)) ||
+                (p.categoria && p.categoria.toLowerCase().includes(q))
+            ));
+        }
+
+        async function guardarItem(e) {
+            e.preventDefault();
+            const id = document.getElementById("itemId").value;
+            const body = {
+                numero: Number(document.getElementById("numero").value),
+                codigo: document.getElementById("codigo").value.trim(),
+                nombre: document.getElementById("nombre").value.trim(),
+                precio: Number(document.getElementById("precio").value),
+                marca: document.getElementById("marca").value.trim(),
+                categoria: document.getElementById("categoria").value,
+                imagen: document.getElementById("imagen").value.trim(),
+                descripcion: document.getElementById("descripcion").value.trim()
+            };
+
+            if (id) {
+                await fetch(`${API_URL}/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                mostrarAviso("Producto actualizado exitosamente.");
+            } else {
+                await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                mostrarAviso("Producto registrado exitosamente.");
+            }
+
+            resetForm();
+            cargarItems();
+        }
+
+        function editarItem(id) {
+            const p = items.find(x => String(x.id) === String(id));
+            if (!p) return;
+            document.getElementById("itemId").value = p.id;
+            document.getElementById("numero").value = p.numero || "";
+            document.getElementById("codigo").value = p.codigo || "";
+            document.getElementById("nombre").value = p.nombre || "";
+            document.getElementById("precio").value = p.precio || "";
+            document.getElementById("marca").value = p.marca || "";
+            document.getElementById("categoria").value = p.categoria || "Línea Eléctrica";
+            document.getElementById("imagen").value = p.imagen || "";
+            document.getElementById("descripcion").value = p.descripcion || "";
+
+            document.getElementById("formHeading").textContent = `Editar: ${p.codigo || p.nombre}`;
+            document.getElementById("btnGuardar").textContent = "Actualizar Producto";
+            document.getElementById("btnCancelar").style.display = "block";
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        function resetForm() {
+            document.getElementById("crudForm").reset();
+            document.getElementById("itemId").value = "";
+            document.getElementById("formHeading").textContent = "Registrar Producto";
+            document.getElementById("btnGuardar").textContent = "Registrar Producto";
+            document.getElementById("btnCancelar").style.display = "none";
+        }
+
+        function borrarItem(id) {
+            const p = items.find(x => String(x.id) === String(id));
+            idPendienteEliminar = id;
+            document.getElementById("neonDeleteTarget").textContent = p
+                ? `${p.codigo ? "[" + p.codigo + "] " : ""}${p.nombre}`
+                : `ID #${id}`;
+            document.getElementById("neonDeleteModal").classList.add("open");
+        }
+
+        function cerrarModalEliminar() {
+            idPendienteEliminar = null;
+            document.getElementById("neonDeleteModal").classList.remove("open");
+        }
+
+        async function confirmarEliminacion() {
+            if (!idPendienteEliminar) return;
+            const id = idPendienteEliminar;
+            cerrarModalEliminar();
+            await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+            mostrarAviso("Producto eliminado exitosamente.");
+            cargarItems();
+        }
+
+        function verDetalle(id) {
+            const p = items.find(x => String(x.id) === String(id));
+            if (!p) return;
+            const imgSrc = p.imagen && p.imagen.trim() !== "" ? p.imagen : AVATAR_DEFAULT;
+            document.getElementById("detailBoxContent").innerHTML = `
+        <img src="${imgSrc}" alt="${p.nombre}" onerror="this.src='${AVATAR_DEFAULT}'" />
+        <h3 style="margin-bottom:6px;">${p.nombre}</h3>
+        <p style="font-size:0.85rem; color:#6b7280; margin-bottom:12px;">Código: <strong>${p.codigo || "-"}</strong> · Marca: <strong>${p.marca || "-"}</strong></p>
+        <p style="font-size:0.9rem; margin-bottom:12px;">${p.descripcion || "Sin descripción adicional."}</p>
+        <div style="font-size:1.15rem; font-weight:800; color:#0284c7; margin-bottom:16px;">Bs. ${Number(p.precio || 0).toFixed(2)}</div>
+        <button onclick="cerrarDetalle()" style="background:#27272a; color:white; border:none; padding:9px 20px; border-radius:6px; font-weight:600; cursor:pointer;">Cerrar</button>
+      `;
+            document.getElementById("detailModal").classList.add("open");
+        }
+
+        function cerrarDetalle() {
+            document.getElementById("detailModal").classList.remove("open");
+        }
+    </script>
+</body>
+
+</html>

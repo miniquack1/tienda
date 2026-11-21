@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contacto y Ubicaciones | Arauco Importaciones</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --cyan: #00b4ff; --dark: #1f2937; --bg: #f8fafc; --border: #e5e7eb; --white: #ffffff; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--dark); }
+    header {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 4%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .logo { font-size: 1.6rem; font-weight: 800; color: var(--cyan); text-decoration: none; }
+    .phone-bar { background: var(--cyan); padding: 8px 4%; font-size: 0.85rem; font-weight: 600; }
+    .phone-bar a { color: var(--dark); text-decoration: none; }
+    .wrap {
+      max-width: 960px;
+      margin: 32px auto;
+      padding: 0 4%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .box h2 { margin-bottom: 14px; font-size: 1.2rem; }
+    .box p { margin-bottom: 10px; font-size: 0.92rem; color: #4b5563; }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 5px;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+    button {
+      background: var(--cyan);
+      color: var(--white);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    @media (max-width: 760px) { .wrap { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html" class="logo">Kila Importaciones</a>
+    <a href="index.html" style="text-decoration:none; color:var(--dark); font-weight:600;">← Volver a Inicio / Tienda</a>
+  </header>
+  <div class="phone-bar">
+    <a href="tel:+59172775209">📞 +591 72775209</a>
+  </div>
+
+  <div class="wrap">
+    <div class="box">
+      <h2>Ubicaciones y Atención</h2>
+      <p><strong>Teléfono / WhatsApp:</strong> +591 72775209</p>
+      <p><strong>Horario de atención:</strong> Lunes a Viernes 08:30 - 18:30 · Sábados 09:00 - 13:00</p>
+      <p><strong>Cobertura:</strong> Envíos y atención de cotizaciones en toda Bolivia.</p>
+      <a href="https://wa.me/59172775209" target="_blank" style="display:inline-block; margin-top:10px; background:#16a34a; color:white; padding:9px 16px; border-radius:5px; text-decoration:none; font-weight:600;">Escribir por WhatsApp</a>
+    </div>
+
+    <div class="box">
+      <h2>Enviar Consulta</h2>
+      <form onsubmit="enviarConsulta(event)">
+        <input type="text" id="cNombre" placeholder="Tu nombre" required />
+        <input type="tel" id="cTel" placeholder="Tu teléfono" required />
+        <textarea id="cMsg" rows="4" placeholder="¿Qué herramienta o equipo necesitas cotizar?" required></textarea>
+        <button type="submit">Enviar por WhatsApp</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function enviarConsulta(e) {
+      e.preventDefault();
+      const n = document.getElementById("cNombre").value;
+      const t = document.getElementById("cTel").value;
+      const m = document.getElementById("cMsg").value;
+      const url = `https://wa.me/59172775209?text=${encodeURIComponent(`Hola, soy ${n} (${t}). Consulta: ${m}`)}`;
+      window.open(url, "_blank");
+    }
+  </script>
+</body>
+</html>
